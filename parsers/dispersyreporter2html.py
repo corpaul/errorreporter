@@ -14,6 +14,8 @@ import sys
 import getopt
 import logging
 from StringIO import StringIO
+import hashlib
+import operator
 
 class ExceptionLogParser(object):
 
@@ -24,6 +26,7 @@ class ExceptionLogParser(object):
         ch = logging.StreamHandler()
         ch.setLevel(logging.ERROR)
         self._logger.addHandler(ch)
+        
 
     def process_report(self, pkg_path, report_dir, to_overwrite):
         """Parses a given package and creates a report out of it.
@@ -39,23 +42,42 @@ class ExceptionLogParser(object):
         content = self.__parse_bz2pkg(pkg_path)
         if not content:
             return
-
+        
         in_s = StringIO(content)
         
-        # init html report
-        creator = HTMLReportCreator()
-        creator.create(report_title, report_filepath, to_overwrite)
-                        
+              
+        stacktraces = []
+        aggregate_stacktraces = {}          
         while True:
             try:
                 xml_data_dict = self.__create_report(in_s)
                 if not xml_data_dict:
                     return
-            except:
+            except EOFError:
                 break
             else:        
-                creator.append("Stack #%d" % trace, xml_data_dict)
-                trace = trace+1
+                xml_data_dict[u'id'] = trace
+                trace = trace + 1
+                stacktraces.append(xml_data_dict)
+                m = hashlib.md5()
+                if xml_data_dict.get(u'stack') is None:
+                    continue
+                m.update(xml_data_dict.get(u'stack'))
+                digest = m.digest()
+                if digest in aggregate_stacktraces:
+                    aggregate_stacktraces[digest].addStacktrace(xml_data_dict)
+                else:
+                    aggregate_stacktraces[digest] = AggregateStacktrace(xml_data_dict)
+        
+        # init html report
+        creator = HTMLReportCreator()
+        creator.create(report_title, report_filepath, to_overwrite, stacktraces, aggregate_stacktraces)
+        
+        creator.appendAggregate(aggregate_stacktraces)
+        for i in range(0, len(stacktraces)):
+            creator.appendStack(stacktraces[i])
+                
+        
         
         creator.write(report_filepath)
             
@@ -94,22 +116,34 @@ class ExceptionLogParser(object):
         # get fields
         xml_data_dict = {}
 
-        COPMULSORY_FIELDS = (u'sysinfo', u'comments', u'stack')
+        COMPULSORY_FIELDS = (u'sysinfo', u'comments', u'stack', u'remote_host')
 
         xml_data_dict[u'timestamp'] = raw_data_dict.get(u'timestamp', None)
         post = raw_data_dict.get(u'post', None)
         if post:
             for kw, val in post:
-                if kw in COPMULSORY_FIELDS:
-                    xml_data_dict[kw] = val
-
+                if kw in COMPULSORY_FIELDS:
+                    xml_data_dict[kw] = val    
+        
         # check compulsory fields
-        for kw in COPMULSORY_FIELDS:
+        for kw in COMPULSORY_FIELDS:
             if kw not in xml_data_dict:
-                xml_data_dict[kw] = None
-
+                xml_data_dict[kw] = None                
         return xml_data_dict
 
+class AggregateStacktrace(object):
+    def __init__(self, stacktrace):
+        super(AggregateStacktrace, self).__init__()
+        self._stacktrace = stacktrace.get(u'stack')
+        self.count = 1
+        self.comments = {}
+        self.comments[stacktrace.get(u'id')] = (stacktrace.get(u'comments'))
+        
+        
+    def addStacktrace(self, stacktrace):
+        self.comments[stacktrace.get(u'id')] = (stacktrace.get(u'comments'))
+        self.count = self.count+1
+    
 
 class HTMLReportCreator(object):
 
@@ -120,7 +154,7 @@ class HTMLReportCreator(object):
         self.title = ""
         self.html_content = ""
 
-    def create(self, title, filepath, to_overwrite):
+    def create(self, title, filepath, to_overwrite, stacktraces, aggregates):
         """Creates an HTML report from a give data dict.
         """
         if os.path.exists(filepath) and not to_overwrite:
@@ -133,10 +167,38 @@ class HTMLReportCreator(object):
         self.html_content += u"  <title>Report overview for %s</title>\n" % title
         self.html_content += u"</head>\n"
         self.html_content += u"<body>\n"
+        self.html_content += u"<h1>Overview report</h1>"
+        self.html_content += u"Total # of reports: %s<br>\n" % len(stacktraces)
+        self.html_content += u"Total # of different stacks: %s" % len(aggregates)
+        
+        
+    def appendAggregate(self, aggregates):
+        self.html_content += u"  <h1>Aggregate stacks</h1>\n"
+        #for aggr in aggregates.values():
+        for aggr in (sorted(aggregates.values(), key=operator.attrgetter('count'), reverse=True)):
+            self.html_content += u"  <table border=\"1\" style=\"width: 1000px; margin-bottom: 20px;\">\n"
+            self.html_content += u"  <tr>\n"
+            self.html_content += u"    <th>Aggregate stacktrace (# of reports: %d)</th>\n" % aggr.count
+            self.html_content += u"  </tr><tr>\n"
+            stack = unicode(aggr._stacktrace).replace('\n', '<br/>')
+            self.html_content += u"    <td>%s</td>\n" % stack            
+            self.html_content += u"</tr><tr>\n"
+            self.html_content += u"    <th>Comments:</th>\n</tr><tr>\n<td>"
+            comments_not_provided = ""
+            for i, c in aggr.comments.iteritems():
+                if c != "Not provided":
+                    self.html_content += u"    %s (<a href=\"#%s\">#%s</a>)\n<br>----<br>" % (c, i, i)
+                else:
+                    comments_not_provided += u"<a href=\"#%s\">#%s</a>, " % (i, i)
+            if comments_not_provided != "":
+                self.html_content += u" Not provided (%s)\n<br>" % comments_not_provided[:-2]
+            self.html_content += u"</td></tr>"
+            self.html_content += u"  </table>\n"        
 
-    def append(self, title, data_dict):
-        self.html_content += u"  <h1>%s</h1>\n" % title
-        self.html_content += u"  <table border=\"1\">\n"
+
+    def appendStack(self, data_dict):
+        self.html_content += u"  <h1><a name=\"%s\">Stack #%s</a></h1>\n" % (data_dict[u'id'], data_dict[u'id'])
+        self.html_content += u"  <table border=\"1\" style=\"width: 1000px; margin-bottom: 20px;\">\n"
         for kw, val in data_dict.iteritems():
             if kw in (u"sysinfo", ):
                 continue
@@ -146,8 +208,7 @@ class HTMLReportCreator(object):
             self.html_content += u"    <td>%s</td>\n" % content
             self.html_content += u"  </tr>\n"
         self.html_content += u"  </table>\n"
-        self.html_content += u"<hr>\n"
-        
+                
 
     def write(self, filepath):
         outfile = None
