@@ -16,6 +16,7 @@ import logging
 from StringIO import StringIO
 import hashlib
 import operator
+import re
 
 class ExceptionLogParser(object):
 
@@ -35,6 +36,8 @@ class ExceptionLogParser(object):
         report_title = os.path.splitext(os.path.basename(pkg_path))[0]
         report_filename = u"%s.html" % (report_title)
         report_filepath = os.path.join(report_dir, report_filename)
+        flamegraph_filename = u"%s_fg.txt" % (report_title)
+        flamegraph_filepath = os.path.join(report_dir, flamegraph_filename)
         trace = 0
         if not to_overwrite and os.path.exists(report_filepath):
             return
@@ -73,13 +76,15 @@ class ExceptionLogParser(object):
         creator = HTMLReportCreator()
         creator.create(report_title, report_filepath, to_overwrite, stacktraces, aggregate_stacktraces)
         
-        creator.appendAggregate(aggregate_stacktraces)
+        creator.appendAggregate(aggregate_stacktraces, flamegraph_filepath)
+        creator.appendAggregateToFlamegraph(aggregate_stacktraces)
         for i in range(0, len(stacktraces)):
             creator.appendStack(stacktraces[i])
                 
         
         
         creator.write(report_filepath)
+        creator.writeFlamegraph(flamegraph_filepath)
             
 
     def __parse_bz2pkg(self, pkg_path):
@@ -153,6 +158,7 @@ class HTMLReportCreator(object):
         self._logger = logging.getLogger(self.__class__.__name__)
         self.title = ""
         self.html_content = ""
+        self.flamegraph_content = ""
 
     def create(self, title, filepath, to_overwrite, stacktraces, aggregates):
         """Creates an HTML report from a give data dict.
@@ -172,7 +178,8 @@ class HTMLReportCreator(object):
         self.html_content += u"Total # of different stacks: %s" % len(aggregates)
         
         
-    def appendAggregate(self, aggregates):
+    def appendAggregate(self, aggregates, flamegraph):
+        self.html_content += u"<object data=\"%s\" type=\"image/svg+xml\" id=\"version1\" width=\"1000px\"></object>\n" % flamegraph
         self.html_content += u"  <h1>Aggregate stacks</h1>\n"
         #for aggr in aggregates.values():
         for aggr in (sorted(aggregates.values(), key=operator.attrgetter('count'), reverse=True)):
@@ -196,6 +203,14 @@ class HTMLReportCreator(object):
             self.html_content += u"  </table>\n"        
 
 
+    def appendAggregateToFlamegraph(self, aggregates):
+        for aggr in (sorted(aggregates.values(), key=operator.attrgetter('count'), reverse=True)):
+            p = StacktraceParser()
+            stack = unicode(aggr._stacktrace).replace('\n', ';')
+            parsedstack = p.parse(stack, ';')            
+            self.flamegraph_content += "%s %d\n" % (parsedstack, aggr.count)
+        
+        
     def appendStack(self, data_dict):
         self.html_content += u"  <h1><a name=\"%s\">Stack #%s</a></h1>\n" % (data_dict[u'id'], data_dict[u'id'])
         self.html_content += u"  <table border=\"1\" style=\"width: 1000px; margin-bottom: 20px;\">\n"
@@ -223,6 +238,45 @@ class HTMLReportCreator(object):
         finally:
             if outfile:
                 outfile.close()
+                
+    def writeFlamegraph(self, filepath):
+        outfile = None
+        try:
+            outfile = codecs.open(filepath, 'wb', 'utf-8')
+            outfile.write(self.flamegraph_content)
+        except:
+            self._logger.exception(u"Failed to write to flamegraph file [%s]", filepath)
+        finally:
+            if outfile:
+                outfile.close()
+
+
+class StacktraceParser(object):
+    def __init__(self):
+        super(StacktraceParser, self).__init__()
+
+        self._logger = logging.getLogger(self.__class__.__name__)
+    
+    def parse(self, stacktrace, sep):
+        lines = stacktrace.split(sep)
+        p = re.compile(r'File \"(.*)\", line (.*), in (.*)', re.M)
+        result = ""
+        for l in lines:
+            match = re.search(p,  l)
+            if not match:
+                continue
+            stack_file = match.group(1)
+            stack_line = match.group(2)
+            function = match.group(3)
+            if result is not "":
+                result = "%s;%s:%s" % (result, stack_file, function)
+            else:
+                result = "%s:%s" % (stack_file, function) 
+        return result            
+            
+                
+        
+        
 
 
 if __name__ == '__main__':
