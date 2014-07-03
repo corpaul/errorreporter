@@ -40,4 +40,7 @@ for FG in $(ls $OUTPUTDIR/*_fg.txt -1tr); do
 	FILENAME=${FG/txt/svg}
 	cat $FG | $WORKSPACE_DIR/flamegraph/flamegraph.pl > $FILENAME
 done
+
+# remove fg temp files
+rm $OUTPUTDIR/*_fg.txt
 echo "Done"
