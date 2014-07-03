@@ -7,7 +7,10 @@
 	#exit 65
 #fi
 
-WORKSPACE_DIR=$(readlink -f `dirname "$0"`/..)
+# get parent dir of script from which $0 is executed
+WORKSPACE_DIR=$(readlink -f $( dirname $(readlink -f $(which "$0")))/..)
+
+#$(readlink -f `dirname "$0"`/..)
 
 FORCE=""
 while getopts i:o:f flag; do
