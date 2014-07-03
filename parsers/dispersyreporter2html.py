@@ -174,7 +174,7 @@ class HTMLReportCreator(object):
         self.html_content += u"Total # of different stacks: %s" % len(aggregates)
 
     def appendAggregate(self, aggregates, flamegraph):
-        flamegraph = flamegraph.replace("txt", "svg")
+        flamegraph = os.path.basename(flamegraph.replace("txt", "svg"))
         self.html_content += u"<object data=\"%s\" type=\"image/svg+xml\" id=\"version1\" width=\"1000px\">" \
                               " </object>\n" % flamegraph
         self.html_content += u"  <h1>Aggregate stacks</h1>\n"
