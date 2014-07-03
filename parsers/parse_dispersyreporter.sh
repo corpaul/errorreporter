@@ -7,6 +7,8 @@
 	#exit 65
 #fi
 
+WORKSPACE_DIR=$(readlink -f `dirname "$0"`/..)
+
 FORCE=""
 while getopts i:o:f flag; do
 	case $flag in
@@ -27,12 +29,12 @@ if [ -z ${INPUTDIR+x} ] || [ -z ${OUTPUTDIR+x} ]; then
 	exit;
 fi
 
+python $WORKSPACE_DIR/parsers/dispersyreporter2html.py -i $INPUTDIR -o $OUTPUTDIR $FORCE
 
-
-python dispersyreporter2html.py -i $INPUTDIR -o $OUTPUTDIR $FORCE
-
+echo "Generating flame graphs..."
 # generate flamegraphs
 for FG in $(ls $OUTPUTDIR/*_fg.txt -1tr); do
 	FILENAME=${FG/txt/svg}
-	echo "cat $FG | ../FlameGraph/flamegraph.pl > $FILENAME"
+	cat $FG | $WORKSPACE_DIR/flamegraph/flamegraph.pl > $FILENAME
 done
+echo "Done"

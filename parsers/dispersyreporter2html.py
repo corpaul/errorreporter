@@ -18,6 +18,7 @@ import hashlib
 import operator
 import re
 
+
 class ExceptionLogParser(object):
 
     def __init__(self):
@@ -27,7 +28,6 @@ class ExceptionLogParser(object):
         ch = logging.StreamHandler()
         ch.setLevel(logging.ERROR)
         self._logger.addHandler(ch)
-        
 
     def process_report(self, pkg_path, report_dir, to_overwrite):
         """Parses a given package and creates a report out of it.
@@ -41,16 +41,15 @@ class ExceptionLogParser(object):
         trace = 0
         if not to_overwrite and os.path.exists(report_filepath):
             return
-        
+
         content = self.__parse_bz2pkg(pkg_path)
         if not content:
             return
-        
+
         in_s = StringIO(content)
-        
-              
+
         stacktraces = []
-        aggregate_stacktraces = {}          
+        aggregate_stacktraces = {}
         while True:
             try:
                 xml_data_dict = self.__create_report(in_s)
@@ -58,7 +57,7 @@ class ExceptionLogParser(object):
                     return
             except EOFError:
                 break
-            else:        
+            else:
                 xml_data_dict[u'id'] = trace
                 trace = trace + 1
                 stacktraces.append(xml_data_dict)
@@ -71,21 +70,18 @@ class ExceptionLogParser(object):
                     aggregate_stacktraces[digest].addStacktrace(xml_data_dict)
                 else:
                     aggregate_stacktraces[digest] = AggregateStacktrace(xml_data_dict)
-        
+
         # init html report
         creator = HTMLReportCreator()
         creator.create(report_title, report_filepath, to_overwrite, stacktraces, aggregate_stacktraces)
-        
+
         creator.appendAggregate(aggregate_stacktraces, flamegraph_filepath)
         creator.appendAggregateToFlamegraph(aggregate_stacktraces)
         for i in range(0, len(stacktraces)):
             creator.appendStack(stacktraces[i])
-                
-        
-        
+
         creator.write(report_filepath)
         creator.writeFlamegraph(flamegraph_filepath)
-            
 
     def __parse_bz2pkg(self, pkg_path):
         """Parses a bzip2 packge of an exception report and returns a data
@@ -112,11 +108,11 @@ class ExceptionLogParser(object):
     def __create_report(self, content_stream):
         """Creats a report out of a given content. It returns a dict for XML.
         """
-        #try:
+        # try:
         raw_data_dict = pickle.load(content_stream)
-        #except:
+        # except:
         #    self._logger.exception(u"Failed to load pickle content [%s]", content_stream)
-        #    raise EOFError            
+        #    raise EOFError
 
         # get fields
         xml_data_dict = {}
@@ -128,13 +124,14 @@ class ExceptionLogParser(object):
         if post:
             for kw, val in post:
                 if kw in COMPULSORY_FIELDS:
-                    xml_data_dict[kw] = val    
-        
+                    xml_data_dict[kw] = val
+
         # check compulsory fields
         for kw in COMPULSORY_FIELDS:
             if kw not in xml_data_dict:
-                xml_data_dict[kw] = None                
+                xml_data_dict[kw] = None
         return xml_data_dict
+
 
 class AggregateStacktrace(object):
     def __init__(self, stacktrace):
@@ -143,12 +140,11 @@ class AggregateStacktrace(object):
         self.count = 1
         self.comments = {}
         self.comments[stacktrace.get(u'id')] = (stacktrace.get(u'comments'))
-        
-        
+
     def addStacktrace(self, stacktrace):
         self.comments[stacktrace.get(u'id')] = (stacktrace.get(u'comments'))
-        self.count = self.count+1
-    
+        self.count = self.count + 1
+
 
 class HTMLReportCreator(object):
 
@@ -176,19 +172,20 @@ class HTMLReportCreator(object):
         self.html_content += u"<h1>Overview report</h1>"
         self.html_content += u"Total # of reports: %s<br>\n" % len(stacktraces)
         self.html_content += u"Total # of different stacks: %s" % len(aggregates)
-        
-        
+
     def appendAggregate(self, aggregates, flamegraph):
-        self.html_content += u"<object data=\"%s\" type=\"image/svg+xml\" id=\"version1\" width=\"1000px\"></object>\n" % flamegraph
+        flamegraph = flamegraph.replace("txt", "svg")
+        self.html_content += u"<object data=\"%s\" type=\"image/svg+xml\" id=\"version1\" width=\"1000px\">" \
+                              " </object>\n" % flamegraph
         self.html_content += u"  <h1>Aggregate stacks</h1>\n"
-        #for aggr in aggregates.values():
+        # for aggr in aggregates.values():
         for aggr in (sorted(aggregates.values(), key=operator.attrgetter('count'), reverse=True)):
             self.html_content += u"  <table border=\"1\" style=\"width: 1000px; margin-bottom: 20px;\">\n"
             self.html_content += u"  <tr>\n"
             self.html_content += u"    <th>Aggregate stacktrace (# of reports: %d)</th>\n" % aggr.count
             self.html_content += u"  </tr><tr>\n"
             stack = unicode(aggr._stacktrace).replace('\n', '<br/>')
-            self.html_content += u"    <td>%s</td>\n" % stack            
+            self.html_content += u"    <td>%s</td>\n" % stack
             self.html_content += u"</tr><tr>\n"
             self.html_content += u"    <th>Comments:</th>\n</tr><tr>\n<td>"
             comments_not_provided = ""
@@ -200,22 +197,20 @@ class HTMLReportCreator(object):
             if comments_not_provided != "":
                 self.html_content += u" Not provided (%s)\n<br>" % comments_not_provided[:-2]
             self.html_content += u"</td></tr>"
-            self.html_content += u"  </table>\n"        
-
+            self.html_content += u"  </table>\n"
 
     def appendAggregateToFlamegraph(self, aggregates):
         for aggr in (sorted(aggregates.values(), key=operator.attrgetter('count'), reverse=True)):
             p = StacktraceParser()
             stack = unicode(aggr._stacktrace).replace('\n', ';')
-            parsedstack = p.parse(stack, ';')            
+            parsedstack = p.parse(stack, ';')
             self.flamegraph_content += "%s %d\n" % (parsedstack, aggr.count)
-        
-        
+
     def appendStack(self, data_dict):
         self.html_content += u"  <h1><a name=\"%s\">Stack #%s</a></h1>\n" % (data_dict[u'id'], data_dict[u'id'])
         self.html_content += u"  <table border=\"1\" style=\"width: 1000px; margin-bottom: 20px;\">\n"
         for kw, val in data_dict.iteritems():
-            if kw in (u"sysinfo", ):
+            if kw in (u"sysinfo",):
                 continue
             self.html_content += u"  <tr>\n"
             self.html_content += u"    <th>%s</th>\n" % kw
@@ -223,7 +218,6 @@ class HTMLReportCreator(object):
             self.html_content += u"    <td>%s</td>\n" % content
             self.html_content += u"  </tr>\n"
         self.html_content += u"  </table>\n"
-                
 
     def write(self, filepath):
         outfile = None
@@ -231,14 +225,14 @@ class HTMLReportCreator(object):
             outfile = codecs.open(filepath, 'wb', 'utf-8')
             self.html_content += u"</body>\n"
 
-            self.html_content += u"</html>\n"   
+            self.html_content += u"</html>\n"
             outfile.write(self.html_content)
         except:
             self._logger.exception(u"Failed to write to file [%s]", filepath)
         finally:
             if outfile:
                 outfile.close()
-                
+
     def writeFlamegraph(self, filepath):
         outfile = None
         try:
@@ -256,13 +250,13 @@ class StacktraceParser(object):
         super(StacktraceParser, self).__init__()
 
         self._logger = logging.getLogger(self.__class__.__name__)
-    
+
     def parse(self, stacktrace, sep):
         lines = stacktrace.split(sep)
         p = re.compile(r'File \"(.*)\", line (.*), in (.*)', re.M)
         result = ""
         for l in lines:
-            match = re.search(p,  l)
+            match = re.search(p, l)
             if not match:
                 continue
             stack_file = match.group(1)
@@ -271,12 +265,8 @@ class StacktraceParser(object):
             if result is not "":
                 result = "%s;%s:%s" % (result, stack_file, function)
             else:
-                result = "%s:%s" % (stack_file, function) 
-        return result            
-            
-                
-        
-        
+                result = "%s:%s" % (stack_file, function)
+        return result
 
 
 if __name__ == '__main__':
@@ -322,4 +312,3 @@ if __name__ == '__main__':
         parser.process_report(infile_path, output_dir, to_overwrite)
 
     print u"Done."
-
