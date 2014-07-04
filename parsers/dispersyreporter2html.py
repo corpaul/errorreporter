@@ -72,7 +72,7 @@ class ExceptionLogParser(object):
                     aggregate_stacktraces[digest] = AggregateStacktrace(xml_data_dict)
 
         # init html report
-        creator = HTMLReportCreator()
+        creator = StacktraceReportCreator()
         creator.create(report_title, report_filepath, to_overwrite, stacktraces, aggregate_stacktraces)
 
         creator.appendAggregate(aggregate_stacktraces, flamegraph_filepath)
@@ -146,10 +146,10 @@ class AggregateStacktrace(object):
         self.count = self.count + 1
 
 
-class HTMLReportCreator(object):
+class StacktraceReportCreator(object):
 
     def __init__(self):
-        super(HTMLReportCreator, self).__init__()
+        super(StacktraceReportCreator, self).__init__()
 
         self._logger = logging.getLogger(self.__class__.__name__)
         self.title = ""
@@ -157,7 +157,7 @@ class HTMLReportCreator(object):
         self.flamegraph_content = ""
 
     def create(self, title, filepath, to_overwrite, stacktraces, aggregates):
-        """Creates an HTML report from a give data dict.
+        """Creates an HTML stack trace report from a given data dict.
         """
         if os.path.exists(filepath) and not to_overwrite:
             return
@@ -269,6 +269,49 @@ class StacktraceParser(object):
         return result
 
 
+class HTMLReportCreator(object):
+
+    def __init__(self):
+        super(HTMLReportCreator, self).__init__()
+
+        self._logger = logging.getLogger(self.__class__.__name__)
+        self.html_content = ""
+        
+    def create(self, input_dir):
+        self.title = u"Overview of received crash reports"
+
+        self.html_content = u"<html>\n"
+
+        self.html_content += u"<head>\n"
+        self.html_content += u"  <title>Overview of received crash reports</title>\n"
+        self.html_content += u" <script src=\"http://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js\"></script>"
+        #self.html_content += u"<script type=\"text/javascript\">$(\"#reports\").change(function(){ var url = \"signature.php?sign=\"+$(this).val(); alert(url);" \
+        #                       "$(\"iframe\").attr(\"src\",url); });</script>" 
+        self.html_content += u"<script type=\"text/javascript\">$(document).ready(function(){ $(\"select\").change(function(){ alert('bla'); } });</script>"
+        self.html_content += u"</head>\n"
+        self.html_content += u"<body>\n"
+        self.html_content += u"<h1>Overview of received crash reports</h1>"
+
+        self.html_content += u"<select id=\"reports\">"
+        for infile in os.listdir(input_dir):
+            if infile.endswith(u"html") and not infile.startswith(u"crashreports.html"):
+                self.html_content += u"<option value=\"%s\">%s</option>" % (infile, infile)
+        self.html_content += u"</select>"
+        
+    def write(self, filepath):
+        outfile = None
+        try:
+            outfile = codecs.open(filepath, 'wb', 'utf-8')
+            self.html_content += u"</body>\n"
+
+            self.html_content += u"</html>\n"
+            outfile.write(self.html_content)
+        except:
+            self._logger.exception(u"Failed to write to file [%s]", filepath)
+        finally:
+            if outfile:
+                outfile.close()
+
 if __name__ == '__main__':
     optlist, args = getopt.getopt(sys.argv[1:], 'i:o:f',
         ['--input-dir=', '--output-dir=', '--force'])
@@ -307,8 +350,17 @@ if __name__ == '__main__':
             print u"Skip %s, not a file..." % infile_path
             continue
 
+        # generate stack trace reports
         print u"Processing %s..." % infile_path
         parser = ExceptionLogParser()
         parser.process_report(infile_path, output_dir, to_overwrite)
+
+
+    print u"Generating crashreports.html..."
+    # generate html report combining the stack traces
+    creator = HTMLReportCreator()
+    creator.create(output_dir)
+    report_filepath = os.path.join(output_dir, u"crashreports.html")
+    creator.write(report_filepath)    
 
     print u"Done."
