@@ -287,7 +287,7 @@ class HTMLReportCreator(object):
         self.html_content += u" <script src=\"http://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js\"></script>"
         #self.html_content += u"<script type=\"text/javascript\">$(\"#reports\").change(function(){ var url = \"signature.php?sign=\"+$(this).val(); alert(url);" \
         #                       "$(\"iframe\").attr(\"src\",url); });</script>" 
-        self.html_content += u"<script type=\"text/javascript\">$(document).ready(function(){ $(\"select\").change(function(){ alert('bla'); } });</script>"
+        self.html_content += u"<script type=\"text/javascript\">$(document).ready(function(){ $(\"select\").change(function(){ var url = $(this).val(); $(\"iframe\").attr(\"src\",url); }) });</script>"
         self.html_content += u"</head>\n"
         self.html_content += u"<body>\n"
         self.html_content += u"<h1>Overview of received crash reports</h1>"
@@ -296,12 +296,13 @@ class HTMLReportCreator(object):
         for infile in os.listdir(input_dir):
             if infile.endswith(u"html") and not infile.startswith(u"crashreports.html"):
                 self.html_content += u"<option value=\"%s\">%s</option>" % (infile, infile)
-        self.html_content += u"</select>"
+        self.html_content += u"</select><br><br>"
         
     def write(self, filepath):
         outfile = None
         try:
             outfile = codecs.open(filepath, 'wb', 'utf-8')
+            self.html_content += u"<iframe style=\"width: 1100px; height: 800px;\"></iframe>"
             self.html_content += u"</body>\n"
 
             self.html_content += u"</html>\n"
