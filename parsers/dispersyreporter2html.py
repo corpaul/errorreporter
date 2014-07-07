@@ -41,8 +41,13 @@ class ExceptionLogParser(object):
         trace = 0
         if not to_overwrite and os.path.exists(report_filepath):
             return
-
-        content = self.__parse_bz2pkg(pkg_path)
+        
+        if pkg_path.endswith("bz2"):
+            content = self.__parse_bz2pkg(pkg_path)
+        else:
+            with file(pkg_path) as f: 
+                content = f.read()
+            
         if not content:
             return
 
@@ -346,9 +351,7 @@ if __name__ == '__main__':
         if not infile.startswith(u"exception"):
             print u"Skip %s, not an exception report..." % infile_path
             continue
-        if not infile.endswith(u"bz2"):
-            print u"Skip %s, not an bz2 file (empty?)..." % infile_path
-            continue
+        
         if not os.path.isfile(infile_path):
             print u"Skip %s, not a file..." % infile_path
             continue
