@@ -172,6 +172,7 @@ class StacktraceReportCreator(object):
 
         self.html_content += u"<head>\n"
         self.html_content += u"  <title>Report overview for %s</title>\n" % title
+        self.html_content += u"<script type=\"text/javascript\">function highlight(element) { } function unhighlight(element) {}</script>"
         self.html_content += u"</head>\n"
         self.html_content += u"<body>\n"
         self.html_content += u"<h1>Overview report for %s</h1>" % title
