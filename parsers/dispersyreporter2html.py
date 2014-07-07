@@ -298,7 +298,13 @@ class HTMLReportCreator(object):
         self.html_content += u"<h1>Overview of received crash reports</h1>"
 
         self.html_content += u"<select id=\"reports\">"
-        for infile in sorted(os.listdir(input_dir)):
+        files = []
+        for infile in os.listdir(input_dir):
+            files.append(infile)
+        
+        files = sorted(files)
+        
+        for infile in files:
             if infile.endswith(u"html") and not infile.startswith(u"crashreports.html"):
                 self.html_content += u"<option value=\"%s\">%s</option>" % (infile, infile)
         self.html_content += u"</select><br><br>"
