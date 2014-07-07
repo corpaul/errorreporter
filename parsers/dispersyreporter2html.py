@@ -174,7 +174,7 @@ class StacktraceReportCreator(object):
         self.html_content += u"  <title>Report overview for %s</title>\n" % title
         self.html_content += u"</head>\n"
         self.html_content += u"<body>\n"
-        self.html_content += u"<h1>Overview report</h1>"
+        self.html_content += u"<h1>Overview report for %s</h1>" % title
         self.html_content += u"Total # of reports: %s<br>\n" % len(stacktraces)
         self.html_content += u"Total # of different stacks: %s" % len(aggregates)
 
@@ -294,7 +294,7 @@ class HTMLReportCreator(object):
         #                       "$(\"iframe\").attr(\"src\",url); });</script>" 
         self.html_content += u"<script type=\"text/javascript\">$(document).ready(function(){ "
         self.html_content += u"$(\"#reports\").change(function(){ var url = $(this).val(); $(\"iframe\").attr(\"src\",url); }); ";
-        self.html_content += u"});</script>"
+        self.html_content += u"$(\"iframe\").attr(\"src\",$(\"#reports option:selected\").val()); });</script>"
         self.html_content += u"</head>\n"
         self.html_content += u"<body>\n"
         self.html_content += u"<h1>Overview of received crash reports</h1>"
