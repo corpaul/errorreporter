@@ -346,7 +346,9 @@ if __name__ == '__main__':
         if not infile.startswith(u"exception"):
             print u"Skip %s, not an exception report..." % infile_path
             continue
-
+        if not infile.endswith(u"bz2"):
+            print u"Skip %s, not an bz2 file (empty?)..." % infile_path
+            continue
         if not os.path.isfile(infile_path):
             print u"Skip %s, not a file..." % infile_path
             continue
