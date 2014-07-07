@@ -122,7 +122,7 @@ class ExceptionLogParser(object):
         # get fields
         xml_data_dict = {}
 
-        COMPULSORY_FIELDS = (u'sysinfo', u'comments', u'stack', u'remote_host')
+        COMPULSORY_FIELDS = (u'sysinfo', u'comments', u'stack', u'remote_host', u'sysinfo')
 
         xml_data_dict[u'timestamp'] = raw_data_dict.get(u'timestamp', None)
         post = raw_data_dict.get(u'post', None)
@@ -216,8 +216,8 @@ class StacktraceReportCreator(object):
         self.html_content += u"  <h1><a name=\"%s\">Stack #%s</a></h1>\n" % (data_dict[u'id'], data_dict[u'id'])
         self.html_content += u"  <table border=\"1\" style=\"width: 1000px; margin-bottom: 20px;\">\n"
         for kw, val in data_dict.iteritems():
-            if kw in (u"sysinfo",):
-                continue
+           # if kw in (u"sysinfo",):
+           #     continue
             self.html_content += u"  <tr>\n"
             self.html_content += u"    <th>%s</th>\n" % kw
             content = unicode(val).replace('\n', '<br/>')
