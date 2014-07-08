@@ -1,0 +1,53 @@
+<html>
+<head>
+	<title>Report overview for %s</title>
+	<script type="text/javascript">
+	function highlight(element) { }
+	function unhighlight(element) {}
+	</script>
+	<style>
+	table.crashreport {
+		width: 1000px;
+		margin-bottom: 20px;
+	}
+
+	table.crashreport th {
+		width: 200px;
+	}
+	</style>
+</head>
+<body>
+<h1>Overview report for {{ date }}</h1>
+{% if crashreports %}
+	Total # of reports: {{ crashreports|length }}<br>
+	Total # of different stacks: TODO
+{% else %}
+	No crash reports for {{ date }}.
+{% endif %}
+
+AGGREGATE STUFF GOES HERE
+
+{% if crashreports %}
+	{% for c in crashreports %}
+		<h1><a name="{{ c.id }}">Stack #{{ c.id }}</a></h1>
+    	<table border="1" class="crashreport">
+		<tr>
+        <th>Tribler version</th>
+        <td>{{ c.version }}</td>
+       	</tr>
+       	<tr>
+        <th>Sysinfo</th>
+        <td>{{ c.sysinfo }}</td>
+       	</tr>
+       	<tr>
+        <th>Comments</th>
+        <td>{{ c.comments }}</td>
+       	</tr>
+       	<tr>
+        <th>Stack</th>
+        <td>{{ c.stack }}</td>
+       	</tr>
+       	</table>
+	{% endfor %}
+
+{% endif %}
