@@ -6,9 +6,6 @@ Usage:
     -o, --output-dir= :  Output directory.
     -f, --force       :  To overwrite the HTML report if exists.
 """
-from django.conf import settings
-settings.configure()
-
 import bz2
 import pickle
 import os

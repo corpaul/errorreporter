@@ -4,7 +4,7 @@ from django.db import models
 # Create your models here.
 class CrashReport(models.Model):
     id = models.AutoField(primary_key=True)
-    timestamp = models.CharField(max_length=200)
+    timestamp = models.CharField(max_length=200, unique=True)
     sysinfo = models.TextField()
     comments = models.CharField(max_length=300)
     stack = models.TextField()
