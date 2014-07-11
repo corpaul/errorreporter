@@ -1,0 +1,22 @@
+body {
+	background-color: #FAFAFA;
+}
+
+table.crashreport, table.crashreport_aggr {
+	width: 1000px;
+	border-width: 1px;
+	border-style: solid;
+	margin-bottom: 20px;
+}
+
+table.crashreport th {
+	width: 200px;
+	
+}
+table.crashreport_aggr th {
+	width: 200px;
+	background-color: #D8D8D8;
+}
+td {
+	font-size: 12px;
+}

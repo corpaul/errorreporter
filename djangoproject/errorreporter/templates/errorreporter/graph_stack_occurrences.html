@@ -1,0 +1,78 @@
+{% load staticfiles %}
+<html>
+
+<head>
+	<title>Occurrences of selected stack over time</title>
+	<link href="{% static "errorreporter/css/style.css" %}" rel="stylesheet" type="text/css" media="screen" />
+	<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+	<script src="http://cdnjs.cloudflare.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+	<script src="http://cdnjs.cloudflare.com/ajax/libs/flot/0.8.2/jquery.flot.min.js"></script>
+	<script src="http://cdnjs.cloudflare.com/ajax/libs/flot/0.8.2/jquery.flot.time.min.js"></script>
+</head>
+<body>
+<div id='placeholder' style='width: 1200px; height: 300px;'></div>
+<div id="clickdata"></div>
+<script>
+$( document ).ready(function() {
+	var plot = $.plot($("#placeholder"), [
+	[{% for occ in occurrences %} [{{ occ.ts }}, {{ occ.cnt }}], {% endfor %}]
+	], {
+		grid: {
+			hoverable: true,
+			clickable: true
+		},
+		bars: { show: true },
+		xaxis: {
+			mode: "time", timeformat: "%b %d '%y", minTickSize: [1, "day"]
+		}
+		//	ticks:	[
+		//		[{% for occ in occurrences %} [{{ forloop.counter  }}, "{{ occ.date }}"], {% endfor %}]
+		//		]
+		//} */
+	});
+	
+	/*function showTooltip(x, y, contents) {
+		$("<div id='tooltip'>" + contents + "</div>").css({
+			position: "absolute",
+			display: "none",
+			top: y + 5,
+			left: x + 5,
+			border: "1px solid #fdd",
+			padding: "2px",
+			"background-color": "#fee",
+			opacity: 0.80
+		}).appendTo("body").fadeIn(200);
+	}
+	
+	$("#placeholder").bind("plothover", function (event, pos, item) {
+		
+		if ($("#enablePosition:checked").length > 0) {
+			var str = "(" + pos.x.toFixed(2) + ", " + pos.y.toFixed(2) + ")";
+			$("#hoverdata").text(str);
+		}
+		
+		if (item) {
+			if (previousPoint != item.dataIndex) {
+				previousPoint = item.dataIndex;
+				$("#tooltip").remove();
+				//var x = item.datapoint[0].toFixed(0),
+				var x = item.series.xaxis.options.ticks[0][item.dataIndex][1],
+				y = item.datapoint[1].toFixed(2);
+				//y = item.series.xaxis.options.ticks[0][item.dataIndex][1];
+				showTooltip(item.pageX, item.pageY,
+				"Occurrences on " + x + " = " + y);
+			}
+		} else {
+			$("#tooltip").remove();
+			previousPoint = null;
+		} 
+		
+	}); */
+			
+				
+});
+
+</script>
+
+</body>
+</html>
