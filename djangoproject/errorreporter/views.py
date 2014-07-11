@@ -3,7 +3,7 @@ from django.http import HttpResponse
 from django.template import RequestContext, loader
 from django.db.models import Count
 from errorreporter.models import CrashReport
-
+import time
 
 # Create your views here.
 def index(request):
@@ -13,7 +13,6 @@ def index(request):
 
 def overview_crashreport_version(request):
     crashreports = sorted(CrashReport.objects.values('version').distinct(), reverse=True)
-    print crashreports
     context = {'crashreports': crashreports}
     return render(request, 'errorreporter/overview_crashreport_version.html', context)
 
@@ -26,17 +25,65 @@ def overview_crashreport_daily(request):
 
 def crashreport_daily(request, date):
     crashreports = CrashReport.objects.filter(date=date)
+    comments = compact_comments(crashreports)
     objects = CrashReport.objects.values('stack').filter(date=date)
     crashreports_aggr = objects.annotate(cnt=Count('stack')).order_by('-cnt')
     context = {'crashreports': crashreports,
                'crashreports_aggr': crashreports_aggr,
-               'date': date}
+               'date': date,
+               'compact_comments': comments}
     return render(request, 'errorreporter/crashreport_daily.html', context)
 
 
 def crashreport_version(request, version):
+    crashreports = CrashReport.objects.filter(version=version)
+    comments = compact_comments(crashreports)
     objects = CrashReport.objects.values('stack').filter(version=version)
     crashreports_aggr = objects.annotate(cnt=Count('stack')).order_by('-cnt')
-    context = {'crashreports_aggr': crashreports_aggr,
-               'version': version}
+    
+    for c in crashreports_aggr:
+        tmp = CrashReport.objects.filter(stack=c['stack']).first()
+        c['id'] = tmp.id
+    
+    formattedversion = version.replace(".", "_")
+    
+    context = {'crashreports': crashreports,
+               'crashreports_aggr': crashreports_aggr,
+               'version': version,
+               'formattedversion': formattedversion,
+               'compact_comments': comments}
     return render(request, 'errorreporter/crashreport_version.html', context)
+ 
+def graph_stack_occurrences(request, stack_id):
+    objects = CrashReport.objects.filter(id=stack_id)
+    stack = objects.first()
+    
+    if stack:
+        objects = CrashReport.objects.values('date').filter(stack=stack.stack)
+        occurrences = objects.annotate(cnt=Count('date')).order_by('date')
+    else:
+        occurrences = None
+    
+    for o in occurrences:
+        dtt = o['date'].timetuple()
+        ts = time.mktime(dtt)
+        o['ts'] = int(ts)*1000
+        
+    context = {'occurrences': occurrences}
+    return render(request, 'errorreporter/graph_stack_occurrences.html', context)
+            
+
+def compact_comments(objects):
+    """
+    Collect the comments for each stack trace in a more compact fashion, i.e.:
+    Stack1 - comment1 - [id1,id2,...]. This is to prevent hundreds of lines with 'Not provided' in the reports.
+    """
+    comments = {}
+    for o in objects:
+        if not o.stack in comments.keys():
+            comments[o.stack] = {}
+        if not o.comments in comments[o.stack].keys():        
+            comments[o.stack][o.comments] = []
+        comments[o.stack][o.comments].append(o.id)
+    return comments 
+        

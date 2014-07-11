@@ -135,26 +135,12 @@ class ExceptionLogParser(object):
                     version = xml_data_dict[u"stack"].split('\n', 1)[0].replace("Tribler version: ", "")
                     stack = xml_data_dict[u"stack"].replace("Tribler version: %s\n" % version, "")
                 else:
-                    version = "?.?.?"
+                    version = "x.x.x"
                     stack = xml_data_dict[u"stack"]
                 report = CrashReport(timestamp=xml_data_dict[u"timestamp"], sysinfo=xml_data_dict[u"sysinfo"],
                                      comments=xml_data_dict[u"comments"], stack=stack,
                                      version=version, date=date)
                 report.save()
-                # xml_data_dict[u'id'] = trace
-                # trace = trace + 1
-                # stacktraces.append(xml_data_dict)
-                # m = hashlib.md5()
-                # if xml_data_dict.get(u'stack') is None:
-                #    continue
-                # m.update(xml_data_dict.get(u'stack'))
-                # digest = m.digest()
-                # if digest in aggregate_stacktraces:
-                #    aggregate_stacktraces[digest].addStacktrace(xml_data_dict)
-                # else:
-                #    aggregate_stacktraces[digest] = AggregateStacktrace(xml_data_dict)
-
-        # init html report
 
     def __parse_bz2pkg(self, pkg_path):
         """Parses a bzip2 packge of an exception report and returns a data
@@ -224,11 +210,9 @@ class FlameGraphCreator(object):
             if type is "date":
                 v = v[type].strftime("%Y-%m-%d")
                 records = CrashReport.objects.values('stack').filter(date=v).annotate(cnt=Count('stack'))
-                print records.query
 
             if type is "version":
                 records = CrashReport.objects.values('stack').filter(version=v[type]).annotate(cnt=Count('stack'))
-                print CrashReport.objects.values('stack').filter(version=v[type]).annotate(cnt=Count('stack')).query
                 v = v[type].replace(".", "_")
 
             fg_path = os.path.join(os.path.abspath(output_dir), "fg_%s%s.txt" % (type[0], v))
