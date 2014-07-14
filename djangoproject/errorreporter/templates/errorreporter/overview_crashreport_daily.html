@@ -16,7 +16,7 @@ Select date:
 {% if crashreports %}
 	<select id="reports">
 		{% for c in crashreports %}
-			<option value="{{ c.date|date:"Y-m-d" }}">{{ c.date|date:"Y-m-d" }}</option>
+			<option value="{{ c.date|date:"Y-m-d" }}">{{ c.date|date:"Y-m-d" }} ({{ c.cnt }} reports)</option>
 		{% endfor %}
 	</select><br><br>
 {% else %}

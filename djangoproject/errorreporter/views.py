@@ -4,6 +4,7 @@ from django.template import RequestContext, loader
 from django.db.models import Count
 from errorreporter.models import CrashReport
 import time
+import operator
 
 # Create your views here.
 def index(request):
@@ -12,13 +13,13 @@ def index(request):
 
 
 def overview_crashreport_version(request):
-    crashreports = sorted(CrashReport.objects.values('version').distinct(), reverse=True)
+    crashreports = CrashReport.objects.values('version').annotate(cnt=Count('version')).order_by('-version')
     context = {'crashreports': crashreports}
     return render(request, 'errorreporter/overview_crashreport_version.html', context)
 
 
 def overview_crashreport_daily(request):
-    crashreports = sorted(CrashReport.objects.values('date').distinct(), reverse=True)
+    crashreports = CrashReport.objects.values('date').annotate(cnt=Count('date')).order_by('-date')
     context = {'crashreports': crashreports}
     return render(request, 'errorreporter/overview_crashreport_daily.html', context)
 
@@ -72,7 +73,13 @@ def graph_stack_occurrences(request, stack_id):
     context = {'occurrences': occurrences}
     return render(request, 'errorreporter/graph_stack_occurrences.html', context)
             
-
+def stacktrace(request, stack_id):
+    objects = CrashReport.objects.filter(id=stack_id)
+    stack = objects.first()
+    context = {'c': stack}
+    return render(request, 'errorreporter/stacktrace.html', context)
+            
+            
 def compact_comments(objects):
     """
     Collect the comments for each stack trace in a more compact fashion, i.e.:

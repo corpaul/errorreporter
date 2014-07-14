@@ -16,7 +16,7 @@ Select version:
 {% if crashreports %}
 	<select id="reports">
 		{% for c in crashreports %}
-			<option value="{{ c.version }}">{{ c.version }}</option>
+			<option value="{{ c.version }}">{{ c.version }} ({{ c.cnt }} reports)</option>
 		{% endfor %}
 	</select><br><br>
 {% else %}

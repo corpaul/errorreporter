@@ -18,7 +18,7 @@
 	        			{% for comment, ids in comm.items %}
 	        				<li> {{ comment }} 
 	        				{% for id in ids %}
-	        					(<a href="#{{ id }}">#{{ id }}</a>)
+	        					(<a href="{% url 'stacktrace' id %}" class="tooltip">#{{ id }}</a>)
 	        				{% endfor %}
 	        				<br>
 	        			{% endfor %}        			
@@ -33,7 +33,7 @@
 
 <hr>
 
-
+{% comment %}
 {% if crashreports %}
 	{% for c in crashreports %}
 		<h3><a name="{{ c.id }}">Stack #{{ c.id }}</a> <a href="#top">Back to top</a></h3>
@@ -54,3 +54,4 @@
 	{% endfor %}
 
 {% endif %}
+{% endcomment %}
