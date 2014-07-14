@@ -2,9 +2,14 @@
 <html>
 <head>
 	<title>Report overview for %s</title>
+	<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
 	<script type="text/javascript">
 	function highlight(element) { return; }
 	function unhighlight(element) { return; }
+	
+	function toggleDiv(divId) {
+	   $("#"+divId).toggle();
+	}
 	</script>
 	<link href="{% static "errorreporter/css/reports.css" %}" rel="stylesheet" type="text/css" media="screen" />
 </head>
@@ -17,9 +22,10 @@
 	No crash reports for {{ version }}.
 {% endif %}
 
+<br><br>
 
 {% with "errorreporter/flamegraphs/fg_v"|add:formattedversion|add:".svg" as flamegraph %}
-<!--	<object data="{% static flamegraph %}" type="image/svg+xml" id="version1" width="1000px"></object> -->
+	<object data="{% static flamegraph %}" type="image/svg+xml" id="version1" width="1000px"></object>
 {% endwith %}
 
 <br><br>

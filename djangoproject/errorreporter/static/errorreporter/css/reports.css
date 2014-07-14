@@ -1,13 +1,16 @@
 body {
-	background-color: #FAFAFA;
+	background-color: #F2F2F2;
 }
 
-table.crashreport, table.crashreport_aggr {
+table.crashreport, div.crashreport_aggr {
 	width: 1000px;
 	border-width: 1px;
 	border-style: solid;
+	border-color: #D8D8D8;
 	margin-bottom: 20px;
 }
+
+
 
 table.crashreport th {
 	width: 200px;
@@ -17,6 +20,55 @@ table.crashreport_aggr th {
 	width: 200px;
 	background-color: #D8D8D8;
 }
-td {
+
+td, div, dd {
 	font-size: 12px;
+}
+
+div.report_header{
+	width: 100%;
+	background-color: #D8D8D8;
+	text-align: center;
+	font-weight: bold;
+	
+}
+
+div.report_contents
+{
+	background-color: #FFFFFF;
+	padding: 3px;
+}
+
+div.report_contents p, dd p
+{
+	margin: 0px;
+}
+
+ol
+{
+	margin: 0px;
+}
+
+dl.margins_removed
+{
+	margin: 0;
+	padding: 0;
+}
+	
+.margins_removed dt
+{
+	margin: 0;
+	padding: 0;
+	font-weight: bold;
+}
+	
+.margins_removed dd
+{
+	margin: 0 0 1em 0;
+	padding: 0;
+}
+
+.hidden
+{
+	display: none;
 }

@@ -38,8 +38,8 @@ INSTALLED_APPS = (
     'django.contrib.staticfiles',
     'errorreporter',
     'django_evolution',
-    'debug_toolbar',
-    'template_timings_panel'
+    #'debug_toolbar',
+    #'template_timings_panel'
 )
 
 # http://django-debug-toolbar.readthedocs.org/en/latest/configuration.html#debug-toolbar-panels
