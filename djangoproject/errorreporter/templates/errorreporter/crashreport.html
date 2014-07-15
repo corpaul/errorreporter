@@ -3,7 +3,7 @@
 		<div class="crashreport_aggr">
 			<div class="report_header">
 				Aggregate stacktrace (# of reports: {{ c.cnt }})  
-	        	<a href="/errorreporter/graph_stack_occurrences/{{ c.id }}" target="_blank">View occurrences over time</a>
+	        	<a href="{% url 'graph_stack_occurrences' c.id %}" class="tooltip_graph">View occurrences over time</a>
 	        </div>
 			<div class="report_contents">
 	        	{{ c.stack|linebreaks  }}
@@ -18,7 +18,7 @@
 	        			{% for comment, ids in comm.items %}
 	        				<li> {{ comment }} 
 	        				{% for id in ids %}
-	        					(<a href="{% url 'stacktrace' id %}" class="tooltip">#{{ id }}</a>)
+	        					(<a href="{% url 'stacktrace' id %}" class="tooltip_report">#{{ id }}</a>)
 	        				{% endfor %}
 	        				<br>
 	        			{% endfor %}        			
@@ -32,26 +32,3 @@
 {% endif %}
 
 <hr>
-
-{% comment %}
-{% if crashreports %}
-	{% for c in crashreports %}
-		<h3><a name="{{ c.id }}">Stack #{{ c.id }}</a> <a href="#top">Back to top</a></h3>
-    	<dl class="margins_removed">
-			<dt>Tribler version</dt>
-			<dd>{{ c.version }}</dd>
-			<dt>Date</dt>
-			<dd>{{ c.date }}</dd>
-			<dt>Stack <a href="javascript:toggleDiv('stack_{{ forloop.counter }}');">(show/hide)</a></dt>
-			<dd id="stack_{{ forloop.counter }}" class="hidden">{{ c.stack|linebreaks }}</dd>
-       		<dt>Comments <a href="javascript:toggleDiv('comments_{{ forloop.counter }}');">(show/hide)</a></dt>
-       		<dd id="comments_{{ forloop.counter }}" class="hidden">{{ c.comments|linebreaks }}</dd>
-       		<dt>Sysinfo <a href="javascript:toggleDiv('sysinfo_{{ forloop.counter }}');">(show/hide)</a></dt>
-       		<dd id="sysinfo_{{ forloop.counter }}" class="hidden">{{ c.sysinfo|linebreaks }}</dd>
-       	</dl>
-       	<hr>
-		</div>
-	{% endfor %}
-
-{% endif %}
-{% endcomment %}
