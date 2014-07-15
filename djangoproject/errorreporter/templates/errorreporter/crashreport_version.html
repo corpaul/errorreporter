@@ -1,58 +1,23 @@
 {% load staticfiles %}
 <html>
 <head>
-	<title>Report overview for %s</title>
+	<title>Report overview for {{ version }}</title>
 	<!-- <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script> -->
 	<script src="http://cdnjs.cloudflare.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
-	<script src="http://cdn.jsdelivr.net/qtip2/2.2.0/jquery.qtip.min.js"></script>
-	<script src="http://cdnjs.cloudflare.com/ajax/libs/flot/0.8.2/jquery.flot.min.js"></script>
-	<script src="http://cdnjs.cloudflare.com/ajax/libs/flot/0.8.2/jquery.flot.time.min.js"></script>
+	<link rel="stylesheet" href="http://cdnjs.cloudflare.com/ajax/libs/fancybox/2.1.5/jquery.fancybox.css" type="text/css" media="screen" />
+	<script type="text/javascript" src="http://cdnjs.cloudflare.com/ajax/libs/fancybox/2.1.5/jquery.fancybox.js"></script>
 	<script type="text/javascript">
 	function highlight(element) { return; }
 	function unhighlight(element) { return; }
-	function toggleDiv(divId) {
-	   $("#"+divId).toggle();
-	}
-			
+				
 	$(document).ready(function() {
-		$("a.tooltip_report").each(function() {
-	         $(this).qtip({
-	            content: {
-	                text: function(event, api) {
-	                	$.ajax({
-	                        url: api.elements.target.attr('href') // Use href attribute as URL	                        
-	                    })
-	                    .then(function(content) {
-	                        // Set the tooltip content upon successful retrieval
-	                        api.set('content.text', content);
-	                    }, function(xhr, status, error) {
-	                        // Upon failure... set the tooltip content to error
-	                        api.set('content.text', status + ': ' + error);
-	                    });
-	        
-	                    return 'Loading...'; // Set some initial text
-	                }
-	            },
-	            position: {
-				   adjust: {
-				      screen: "flip"
-				   }
-				},
-	            style: 'qtip-wiki',
-	            hide: {
-			        delay: 200,
-			        fixed: true, // <--- add this
-			        effect: function() { $(this).fadeOut(250); }
-			    },
-						    
-	         });
-    	});
-    	
-    	
+		$(".fancybox").fancybox({
+			'type' : 'iframe', 
+			'loop': false,
+			});    	
 	});
 	</script>
 	<link href="{% static "errorreporter/css/reports.css" %}" rel="stylesheet" type="text/css" media="screen" />
-	<link href="http://cdn.jsdelivr.net/qtip2/2.2.0/jquery.qtip.min.css"  rel="stylesheet" type="text/css" media="screen" />
 </head>
 <body>
 <h1>Overview report for {{ version }}</h1>

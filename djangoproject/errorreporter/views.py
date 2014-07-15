@@ -29,6 +29,11 @@ def crashreport_daily(request, date):
     comments = compact_comments(crashreports)
     objects = CrashReport.objects.values('stack').filter(date=date)
     crashreports_aggr = objects.annotate(cnt=Count('stack')).order_by('-cnt')
+    
+    for c in crashreports_aggr:
+        tmp = CrashReport.objects.filter(stack=c['stack']).first()
+        c['id'] = tmp.id
+        
     context = {'crashreports': crashreports,
                'crashreports_aggr': crashreports_aggr,
                'date': date,

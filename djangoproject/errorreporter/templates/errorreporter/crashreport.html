@@ -3,7 +3,7 @@
 		<div class="crashreport_aggr">
 			<div class="report_header">
 				Aggregate stacktrace (# of reports: {{ c.cnt }})  
-	        	<a href="{% url 'graph_stack_occurrences' c.id %}" class="tooltip_graph">View occurrences over time</a>
+	        	<a href="{% url 'graph_stack_occurrences' c.id %}" class="fancybox">View occurrences over time</a>
 	        </div>
 			<div class="report_contents">
 	        	{{ c.stack|linebreaks  }}
@@ -18,7 +18,7 @@
 	        			{% for comment, ids in comm.items %}
 	        				<li> {{ comment }} 
 	        				{% for id in ids %}
-	        					(<a href="{% url 'stacktrace' id %}" class="tooltip_report">#{{ id }}</a>)
+	        					(<a href="{% url 'stacktrace' id %}" class="fancybox" rel="comments_group_{{ forloop.parentloop.parentloop.counter }}" >#{{ id }}</a>)
 	        				{% endfor %}
 	        				<br>
 	        			{% endfor %}        			
