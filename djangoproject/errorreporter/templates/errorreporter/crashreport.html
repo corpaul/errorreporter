@@ -13,18 +13,14 @@
 	       	</div>
 	        <div class="report_contents">
 	       		<ol>
-	       		{% for stack, comm in compact_comments.items %}
-	       			{% ifequal c.stack stack %}
-	        			{% for comment, ids in comm.items %}
-	        				<li> {{ comment }} 
-	        				{% for id in ids %}
-	        					(<a href="{% url 'stacktrace' id %}" class="fancybox" rel="comments_group_{{ forloop.parentloop.parentloop.counter }}" >#{{ id }}</a>)
-	        				{% endfor %}
-	        				<br>
-	        			{% endfor %}        			
-	        		{% endifequal %}
-	        	{% endfor %}
-	        	</ol>
+	       		{% for comment, ids in c.comments.items %}
+		       		<li> {{ comment }} 
+					{% for id in ids %}
+						(<a href="{% url 'stacktrace' id %}" class="fancybox" rel="comments_group_{{ forloop.parentloop.parentloop.counter }}" >#{{ id }}</a>)
+					{% endfor %}
+					<br>
+				{% endfor %}
+	       		</ol>
 	        </div>
 		</div>
 	{% endfor %}

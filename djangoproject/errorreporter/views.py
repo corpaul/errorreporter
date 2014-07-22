@@ -33,6 +33,7 @@ def crashreport_daily(request, date):
     for c in crashreports_aggr:
         tmp = CrashReport.objects.filter(stack=c['stack']).first()
         c['id'] = tmp.id
+        c['comments'] = comments[c['stack']]
         
     context = {'crashreports': crashreports,
                'crashreports_aggr': crashreports_aggr,
@@ -47,9 +48,11 @@ def crashreport_version(request, version):
     objects = CrashReport.objects.values('stack').filter(version=version)
     crashreports_aggr = objects.annotate(cnt=Count('stack')).order_by('-cnt')
     
+    # add some extra info to the aggregate reports
     for c in crashreports_aggr:
         tmp = CrashReport.objects.filter(stack=c['stack']).first()
         c['id'] = tmp.id
+        c['comments'] = comments[c['stack']]
     
     formattedversion = version.replace(".", "_")
     
@@ -70,12 +73,17 @@ def graph_stack_occurrences(request, stack_id):
     else:
         occurrences = None
     
+    total = 0
     for o in occurrences:
         dtt = o['date'].timetuple()
         ts = time.mktime(dtt)
         o['ts'] = int(ts)*1000
+        total = total + o['cnt']
         
-    context = {'occurrences': occurrences}
+    context = {
+               'occurrences': occurrences,
+               'total': total 
+               }
     return render(request, 'errorreporter/graph_stack_occurrences.html', context)
             
 def stacktrace(request, stack_id):
