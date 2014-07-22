@@ -37,8 +37,7 @@ def crashreport_daily(request, date):
         
     context = {'crashreports': crashreports,
                'crashreports_aggr': crashreports_aggr,
-               'date': date,
-               'compact_comments': comments}
+               'date': date}
     return render(request, 'errorreporter/crashreport_daily.html', context)
 
 
@@ -59,8 +58,7 @@ def crashreport_version(request, version):
     context = {'crashreports': crashreports,
                'crashreports_aggr': crashreports_aggr,
                'version': version,
-               'formattedversion': formattedversion,
-               'compact_comments': comments}
+               'formattedversion': formattedversion}
     return render(request, 'errorreporter/crashreport_version.html', context)
  
 def graph_stack_occurrences(request, stack_id):
