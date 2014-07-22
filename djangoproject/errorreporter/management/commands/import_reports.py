@@ -137,9 +137,24 @@ class ExceptionLogParser(object):
                 else:
                     version = "x.x.x"
                     stack = xml_data_dict[u"stack"]
+                
+                os = ""
+                machine = ""
+                
+                # sysinfo may be None
+                if xml_data_dict[u"sysinfo"]:
+                    details = re.findall('platform.details(.*?)\n', xml_data_dict[u"sysinfo"], re.S)    
+                    if details and len(details) > 0:
+                        os = details[0].strip()
+                    
+                    
+                    details = re.findall('platform.machine(.*?)\n', xml_data_dict[u"sysinfo"], re.S)
+                    if details and len(details) > 0:
+                        machine = details[0].strip()
+                       
                 report = CrashReport(timestamp=xml_data_dict[u"timestamp"], sysinfo=xml_data_dict[u"sysinfo"],
                                      comments=xml_data_dict[u"comments"], stack=stack,
-                                     version=version, date=date)
+                                     version=version, date=date, os=os, machine=machine)
                 report.save()
 
     def __parse_bz2pkg(self, pkg_path):
