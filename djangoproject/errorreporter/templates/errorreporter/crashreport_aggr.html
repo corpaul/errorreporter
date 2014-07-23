@@ -1,7 +1,7 @@
 {% load staticfiles %}
 <html>
 <head>
-	<title>Report overview for {{ version }}</title>
+	<title>Report overview for {{ report_for }}</title>
 	<!-- <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script> -->
 	<script src="http://cdnjs.cloudflare.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
 	<link rel="stylesheet" href="http://cdnjs.cloudflare.com/ajax/libs/fancybox/2.1.5/jquery.fancybox.css" type="text/css" media="screen" />
@@ -20,17 +20,17 @@
 	<link href="{% static "errorreporter/css/reports.css" %}" rel="stylesheet" type="text/css" media="screen" />
 </head>
 <body>
-<h1>Overview report for {{ version }}</h1>
+<h1>Overview report for {{ report_for }}</h1>
 {% if crashreports %}
 	Total # of reports: {{ crashreports|length }}<br>
 	Total # of different stacks: {{ crashreports_aggr|length }}
 {% else %}
-	No crash reports for {{ version }}.
+	No crash reports for {{ report_for }}.
 {% endif %}
 
 <br><br>
 
-{% with "errorreporter/flamegraphs/fg_v"|add:formattedversion|add:".svg" as flamegraph %}
+{% with "errorreporter/flamegraphs/"|add:fg_prefix|add:".svg" as flamegraph %}
 	<object data="{% static flamegraph %}" type="image/svg+xml" id="version1" width="1000px"></object>
 {% endwith %}
 
