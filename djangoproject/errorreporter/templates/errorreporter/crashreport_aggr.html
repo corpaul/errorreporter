@@ -38,7 +38,9 @@
 
 <br><br>
 
-{% include "errorreporter/breakdown_os.html" %}
+{% include "errorreporter/breakdown_sysinfo.html" with sysinfo=os_info info_type="os" title="Breakdown per OS" %}
+
+{% include "errorreporter/breakdown_sysinfo.html" with sysinfo=machine_info info_type="machine" title="Breakdown per machine type" %}
 
 
 {% include "errorreporter/crashreport.html" %}

@@ -28,6 +28,16 @@ def crashreport_daily(request, date):
     objects = CrashReport.objects.values('stack').filter(date=date)
     crashreports_aggr = objects.annotate(cnt=Count('stack')).order_by('-cnt')
 
+    os_objects = CrashReport.objects.values('os').filter(date=date)
+    os_info = os_objects.annotate(cnt=Count('os')).order_by('os')
+    for o in os_info:
+        o['descr'] = o['os']
+
+    machine_objects = CrashReport.objects.values('machine').filter(date=date)
+    machine_info = machine_objects.annotate(cnt=Count('machine')).order_by('machine')
+    for m in machine_info:
+        m['descr'] = m['machine']
+
     for c in crashreports_aggr:
         tmp = CrashReport.objects.filter(stack=c['stack']).first()
         c['id'] = tmp.id
@@ -36,7 +46,9 @@ def crashreport_daily(request, date):
     context = {'crashreports': crashreports,
                'crashreports_aggr': crashreports_aggr,
                'report_for': date,
-               'fg_prefix': "fg_d" + date}
+               'fg_prefix': "fg_d" + date,
+               'os_info': os_info,
+               'machine_info': machine_info}
     return render(request, 'errorreporter/crashreport_aggr.html', context)
 
 
@@ -48,6 +60,13 @@ def crashreport_version(request, version):
 
     os_objects = CrashReport.objects.values('os').filter(version=version)
     os_info = os_objects.annotate(cnt=Count('os')).order_by('os')
+    for o in os_info:
+        o['descr'] = o['os']
+
+    machine_objects = CrashReport.objects.values('machine').filter(version=version)
+    machine_info = machine_objects.annotate(cnt=Count('machine')).order_by('machine')
+    for m in machine_info:
+        m['descr'] = m['machine']
 
     # add some extra info to the aggregate reports
     for c in crashreports_aggr:
@@ -61,7 +80,8 @@ def crashreport_version(request, version):
                'crashreports_aggr': crashreports_aggr,
                'report_for': version,
                'fg_prefix': "fg_v" + formattedversion,
-               'os_info': os_info}
+               'os_info': os_info,
+               'machine_info': machine_info}
     return render(request, 'errorreporter/crashreport_aggr.html', context)
 
 
