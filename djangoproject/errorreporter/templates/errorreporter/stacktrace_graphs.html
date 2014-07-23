@@ -1,0 +1,23 @@
+{% load staticfiles %}
+<html>
+
+<head>
+	<title>Extra information for stack trace</title>
+	<link href="{% static "errorreporter/css/style.css" %}" rel="stylesheet" type="text/css" media="screen" />
+	<script src="http://cdnjs.cloudflare.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+	<script src="http://cdnjs.cloudflare.com/ajax/libs/flot/0.8.2/jquery.flot.min.js"></script>
+	<script src="http://cdnjs.cloudflare.com/ajax/libs/flot/0.8.2/jquery.flot.time.min.js"></script> 
+</head>
+<body>
+<center>
+<div style="height: 700px;">
+{% include "errorreporter/graph_stack_occurrences.html" %}
+
+{% include "errorreporter/breakdown_sysinfo.html" with sysinfo=os_info info_type="os" title="Breakdown per OS" %}
+
+{% include "errorreporter/breakdown_sysinfo.html" with sysinfo=machine_info info_type="machine" title="Breakdown per machine type" %}
+</div>
+</center>
+
+</body>
+</html>

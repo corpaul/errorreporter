@@ -1,9 +1,11 @@
+<div>
+<h3>Aggregate reports:</h3>
 {% if crashreports_aggr %}
 	{% for c in crashreports_aggr %}
 		<div class="crashreport_aggr">
 			<div class="report_header">
 				Aggregate stacktrace (# of reports: {{ c.cnt }})  
-	        	<a href="{% url 'graph_stack_occurrences' c.id %}" class="fancybox">View occurrences over time</a>
+	        	<a href="{% url 'stacktrace_graphs' c.id %}" class="fancybox">More details</a>
 	        </div>
 			<div class="report_contents">
 	        	{{ c.stack|linebreaks  }}
@@ -26,5 +28,5 @@
 	{% endfor %}
 
 {% endif %}
-
+</div>
 <hr>

@@ -47,7 +47,7 @@ def crashreport_version(request, version):
     crashreports_aggr = objects.annotate(cnt=Count('stack')).order_by('-cnt')
 
     os_objects = CrashReport.objects.values('os').filter(version=version)
-    os_info = os_objects.annotate(cnt=Count('os')).order_by('-cnt')
+    os_info = os_objects.annotate(cnt=Count('os')).order_by('os')
 
     # add some extra info to the aggregate reports
     for c in crashreports_aggr:
@@ -65,15 +65,24 @@ def crashreport_version(request, version):
     return render(request, 'errorreporter/crashreport_aggr.html', context)
 
 
-def graph_stack_occurrences(request, stack_id):
+def stacktrace_graphs(request, stack_id):
     objects = CrashReport.objects.filter(id=stack_id)
     stack = objects.first()
 
     if stack:
         objects = CrashReport.objects.values('date').filter(stack=stack.stack)
         occurrences = objects.annotate(cnt=Count('date')).order_by('date')
+        os_objects = CrashReport.objects.values('os').filter(stack=stack.stack)
+        os_info = os_objects.annotate(cnt=Count('os')).order_by('os')
+        for o in os_info:
+            o['descr'] = o['os']
+        machine_objects = CrashReport.objects.values('machine').filter(stack=stack.stack)
+        machine_info = machine_objects.annotate(cnt=Count('machine')).order_by('machine')
+        for m in machine_info:
+            m['descr'] = m['machine']
     else:
         occurrences = None
+        os_info = None
 
     total = 0
     for o in occurrences:
@@ -84,9 +93,11 @@ def graph_stack_occurrences(request, stack_id):
 
     context = {
                'occurrences': occurrences,
-               'total': total
+               'total': total,
+               'os_info': os_info,
+               'machine_info': machine_info
                }
-    return render(request, 'errorreporter/graph_stack_occurrences.html', context)
+    return render(request, 'errorreporter/stacktrace_graphs.html', context)
 
 
 def stacktrace(request, stack_id):
