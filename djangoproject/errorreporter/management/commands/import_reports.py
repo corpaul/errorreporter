@@ -61,10 +61,8 @@ class Command(BaseCommand):
             infile_path = os.path.join(input_dir, infile)
 
             if not infile.startswith(u"exception"):
-                print u"Skip %s, not an exception report..." % infile_path
                 continue
             if not os.path.isfile(infile_path):
-                print u"Skip %s, not a file..." % infile_path
                 continue
 
             # generate stack trace reports
@@ -129,7 +127,6 @@ class ExceptionLogParser(object):
                 break
             else:
                 if CrashReport.objects.filter(timestamp=xml_data_dict[u"timestamp"]).exists():
-                    print "timestamp %s exists, skipping" % xml_data_dict[u"timestamp"]
                     continue
                 if xml_data_dict[u"stack"] and xml_data_dict[u"stack"].startswith("Tribler version:"):
                     version = xml_data_dict[u"stack"].split('\n', 1)[0].replace("Tribler version: ", "")
@@ -137,21 +134,20 @@ class ExceptionLogParser(object):
                 else:
                     version = "x.x.x"
                     stack = xml_data_dict[u"stack"]
-                
+
                 os = ""
                 machine = ""
-                
+
                 # sysinfo may be None
                 if xml_data_dict[u"sysinfo"]:
-                    details = re.findall('platform.details(.*?)\n', xml_data_dict[u"sysinfo"], re.S)    
+                    details = re.findall('platform.details(.*?)\n', xml_data_dict[u"sysinfo"], re.S)
                     if details and len(details) > 0:
                         os = details[0].strip()
-                    
-                    
+
                     details = re.findall('platform.machine(.*?)\n', xml_data_dict[u"sysinfo"], re.S)
                     if details and len(details) > 0:
                         machine = details[0].strip()
-                       
+
                 report = CrashReport(timestamp=xml_data_dict[u"timestamp"], sysinfo=xml_data_dict[u"sysinfo"],
                                      comments=xml_data_dict[u"comments"], stack=stack,
                                      version=version, date=date, os=os, machine=machine)
@@ -216,21 +212,26 @@ class FlameGraphCreator(object):
         ch.setLevel(logging.ERROR)
         self._logger.addHandler(ch)
 
-    def create(self, output_dir, type):
-        if type not in ["date", "version"]:
+    def create(self, output_dir, fg_type):
+        if fg_type not in ["date", "version"]:
             print "Unknown type for flamegraph generation"
             return
-        for v in CrashReport.objects.values(type).distinct():
+        for v in CrashReport.objects.values(fg_type).distinct():
+            if fg_type is "date":
+                v = v[fg_type].strftime("%Y-%m-%d")
+            if fg_type is "version":
+                v = v[fg_type].replace(".", "_")
+            fg_path = os.path.join(os.path.abspath(output_dir), "fg_%s%s.txt" % (fg_type[0], v))
+            # do not regenerate flamegraph if it exists
+            if os.path.isfile(fg_path):
+                continue
             fg = ""
-            if type is "date":
-                v = v[type].strftime("%Y-%m-%d")
+
+            if fg_type is "date":
                 records = CrashReport.objects.values('stack').filter(date=v).annotate(cnt=Count('stack'))
 
-            if type is "version":
-                records = CrashReport.objects.values('stack').filter(version=v[type]).annotate(cnt=Count('stack'))
-                v = v[type].replace(".", "_")
-
-            fg_path = os.path.join(os.path.abspath(output_dir), "fg_%s%s.txt" % (type[0], v))
+            if fg_type is "version":
+                records = CrashReport.objects.values('stack').filter(version=v[fg_type]).annotate(cnt=Count('stack'))
 
             for r in records:
                 p = StacktraceParser()
