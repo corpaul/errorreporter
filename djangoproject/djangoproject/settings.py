@@ -38,8 +38,8 @@ INSTALLED_APPS = (
     'django.contrib.staticfiles',
     'errorreporter',
     'django_evolution',
-    #'debug_toolbar',
-    #'template_timings_panel'
+    # 'debug_toolbar',
+    # 'template_timings_panel'
 )
 
 # http://django-debug-toolbar.readthedocs.org/en/latest/configuration.html#debug-toolbar-panels
@@ -100,5 +100,6 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.6/howto/static-files/
 
-STATIC_URL = '/static/'
-FLAMEGRAPH_PATH = '/home/corpaul/workspace/errorreporter/flamegraph/'
+STATIC_URL = '/errorreporter/static/'
+FLAMEGRAPH_PATH = '/var/www/errorreporter/errorreporter/flamegraph/'
+
