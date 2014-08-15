@@ -12,7 +12,7 @@ from StringIO import StringIO
 from errorreporter.models import CrashReport
 from django.conf import settings
 from django.db.models import Count
-
+import shutil
 
 # Class MUST be named 'Command'
 class Command(BaseCommand):
@@ -56,6 +56,14 @@ class Command(BaseCommand):
         if not os.path.exists(output_dir) or not os.path.isdir(output_dir):
             raise CommandError("output-dir doesn't exist or is not a dir.")
 
+        # make parsed directory for storing parsed reports
+        parsed_dir = os.path.join(input_dir, "parsed")
+        if not os.path.isdir(parsed_dir):
+            try:
+                os.mkdir(parsed_dir)
+            except:
+                print "Could not create parsed directory"
+
         # list all files in the input dir
         for infile in os.listdir(input_dir):
             infile_path = os.path.join(input_dir, infile)
@@ -69,6 +77,12 @@ class Command(BaseCommand):
             print u"Processing %s..." % infile_path
             parser = ExceptionLogParser()
             parser.insert_data(infile_path, output_dir, True)
+            # move parsed report to parsed directory so we don't try to parse it every time
+            try:
+                shutil.move(infile_path, os.path.join(parsed_dir, infile))
+            except:
+                print "Could not backup file: %s" % infile
+
         print "Success!"
 
     def generateFlamegraphs(self, output_dir):
@@ -125,6 +139,7 @@ class ExceptionLogParser(object):
                     return
             except EOFError:
                 break
+
             else:
                 if CrashReport.objects.filter(timestamp=xml_data_dict[u"timestamp"]).exists():
                     continue
@@ -231,7 +246,7 @@ class FlameGraphCreator(object):
                 records = CrashReport.objects.values('stack').filter(date=v).annotate(cnt=Count('stack'))
 
             if fg_type is "version":
-                records = CrashReport.objects.values('stack').filter(version=v[fg_type]).annotate(cnt=Count('stack'))
+                records = CrashReport.objects.values('stack').filter(version=v).annotate(cnt=Count('stack'))
 
             for r in records:
                 p = StacktraceParser()
