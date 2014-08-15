@@ -193,11 +193,10 @@ class ExceptionLogParser(object):
     def __parse_data(self, content_stream):
         """Creats a report out of a given content. It returns a dict for XML.
         """
-        # try:
-        raw_data_dict = pickle.load(content_stream)
-        # except:
-        #    self._logger.exception(u"Failed to load pickle content [%s]", content_stream)
-        #    raise EOFError
+        try:
+            raw_data_dict = pickle.load(content_stream)
+        except:
+            return
 
         # get fields
         xml_data_dict = {}
