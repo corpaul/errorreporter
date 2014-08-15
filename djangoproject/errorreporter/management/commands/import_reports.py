@@ -235,6 +235,7 @@ class FlameGraphCreator(object):
             if fg_type is "date":
                 v = v[fg_type].strftime("%Y-%m-%d")
             if fg_type is "version":
+                v_dots = v[fg_type]
                 v = v[fg_type].replace(".", "_")
             fg_path = os.path.join(os.path.abspath(output_dir), "fg_%s%s.txt" % (fg_type[0], v))
             # do not regenerate flamegraph if it exists
@@ -246,7 +247,7 @@ class FlameGraphCreator(object):
                 records = CrashReport.objects.values('stack').filter(date=v).annotate(cnt=Count('stack'))
 
             if fg_type is "version":
-                records = CrashReport.objects.values('stack').filter(version=v).annotate(cnt=Count('stack'))
+                records = CrashReport.objects.values('stack').filter(version=v_dots).annotate(cnt=Count('stack'))
 
             for r in records:
                 p = StacktraceParser()
