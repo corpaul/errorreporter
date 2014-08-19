@@ -1,0 +1,48 @@
+{% load staticfiles %}
+<html>
+<head>
+	<title>Report overview for {{ report_for }}</title>
+	<!-- <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script> -->
+	<script src="http://cdnjs.cloudflare.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+	<link rel="stylesheet" href="http://cdnjs.cloudflare.com/ajax/libs/fancybox/2.1.5/jquery.fancybox.css" type="text/css" media="screen" />
+	<script type="text/javascript" src="http://cdnjs.cloudflare.com/ajax/libs/fancybox/2.1.5/jquery.fancybox.js"></script>
+	<script src="http://cdnjs.cloudflare.com/ajax/libs/flot/0.8.2/jquery.flot.min.js"></script>
+	<script src="http://cdnjs.cloudflare.com/ajax/libs/flot/0.8.2/jquery.flot.time.min.js"></script> 
+	<script type="text/javascript">
+	function highlight(element) { return; }
+	function unhighlight(element) { return; }
+				
+	$(document).ready(function() {
+		$(".fancybox").fancybox({
+			'type' : 'iframe', 
+			'loop': false,
+			});    	
+	});
+	</script>
+	<link href="{% static "errorreporter/css/reports.css" %}" rel="stylesheet" type="text/css" media="screen" />
+</head>
+<body>
+<h1>Overview report for {{ report_for }}</h1>
+{% if crashreports %}
+	Total # of reports: {{ crashreports|length }}<br>
+	Total # of different stacks: {{ crashreports_aggr|length }}
+{% else %}
+	No crash reports for {{ report_for }}.
+{% endif %}
+
+<br><br>
+
+{% with "errorreporter/flamegraphs/"|add:fg_prefix|add:".svg" as flamegraph %}
+	<object data="{% static flamegraph %}" type="image/svg+xml" id="version1" width="1000px"></object>
+{% endwith %}
+
+<br><br>
+
+{% include "errorreporter/breakdown_sysinfo.html" with sysinfo=os_info info_type="os" title="Breakdown per OS" %}
+
+{% include "errorreporter/breakdown_sysinfo.html" with sysinfo=machine_info info_type="machine" title="Breakdown per machine type" %}
+
+
+{% include "errorreporter/crashreport.html" %}
+</body>
+</html>

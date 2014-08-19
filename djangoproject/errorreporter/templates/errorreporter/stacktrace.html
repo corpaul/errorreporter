@@ -1,0 +1,28 @@
+{% load staticfiles %}
+<html>
+<head>
+	<title>Report overview for %s</title>
+	<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+	<link href="{% static "errorreporter/css/reports.css" %}" rel="stylesheet" type="text/css" media="screen" />
+	
+</head>
+<body>
+<div>	
+<h3><a name="{{ c.id }}">Stack #{{ c.id }}</a></h3>
+<dl class="margins_removed">
+	<dt>Tribler version</dt>
+	<dd>{{ c.version }}</dd>
+	<dt>Date</dt>
+	<dd>{{ c.date }}</dd>
+	<!-- <dt>Stack</a></dt>
+	<dd id="stack_{{ forloop.counter }}" class="hidden">{{ c.stack|linebreaks }}</dd> -->
+	<dt>Comments</dt>
+	<dd id="comments_{{ forloop.counter }}">{{ c.comments|linebreaks }}</dd>
+	<dt>Sysinfo</dt>
+	<dd id="sysinfo_{{ forloop.counter }}">{{ c.sysinfo|linebreaks }}</dd>
+</dl>
+</div>
+
+
+</body>
+</html>

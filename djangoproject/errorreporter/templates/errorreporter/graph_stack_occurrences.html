@@ -1,0 +1,25 @@
+<div>
+<h3>Total occurrences of this stack trace:{{ total }}</h3>
+<div id='placeholder_occurrences' style='width: 700px; height: 150px; margin-right: 50px;'></div>
+<script>
+$( document ).ready(function() {
+	var plot = $.plot($("#placeholder_occurrences"), [
+	[{% for occ in occurrences %} [{{ occ.ts }}, {{ occ.cnt }}], {% endfor %}]
+	], {
+		grid: {
+			hoverable: true,
+			clickable: true
+		},
+		bars: { show: true },
+		xaxis: {
+			mode: "time", timeformat: "%b %d '%y", minTickSize: [1, "day"]
+		}
+		
+	});
+	
+			
+				
+});
+
+</script>
+</div>

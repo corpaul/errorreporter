@@ -1,0 +1,67 @@
+<script src="http://cdnjs.cloudflare.com/ajax/libs/flot/0.8.2/jquery.flot.min.js"></script>
+<script src="http://cdnjs.cloudflare.com/ajax/libs/flot/0.8.2/jquery.flot.time.min.js"></script> 
+
+<div>
+<h3>{{ title }}</h3>
+<div id='placeholder_{{ info_type }}' style='width: 700px; height: 150px; margin-right: 50px;'></div>
+</div>
+<script>
+$( document ).ready(function() {
+	var plot = $.plot($("#placeholder_{{ info_type }}"), [
+	[{% for s in sysinfo %} [{{ forloop.counter }}, {{ s.cnt }}], {% endfor %}]
+	], {
+		grid: {
+			hoverable: true,
+			clickable: true
+		},
+		bars: { show: true },
+		xaxis: {
+			ticks: [
+				[{% for s in sysinfo %} [{{ forloop.counter }}, "{{ s.descr }}"], {% endfor %}]
+				] 
+		}
+		
+	});
+	
+	function showTooltip(x, y, contents) {
+		$("<div id='tooltip'>" + contents + "</div>").css({
+			position: "absolute",
+			display: "none",
+			top: y + 5,
+			left: x + 5,
+			border: "1px solid #fdd",
+			padding: "2px",
+			"background-color": "#fee",
+			opacity: 0.80,
+			"pointer-events": "none"
+		}).appendTo("body").fadeIn(200);
+	}	
+	
+	$("#placeholder_{{ info_type }}").bind("plothover", function (event, pos, item) {
+
+		if ($("#enablePosition:checked").length > 0) {
+			var str = "(" + pos.x.toFixed(2) + ", " + pos.y.toFixed(2) + ")";
+			$("#hoverdata").text(str);
+		}
+
+		if (item) {
+			if (previousPoint != item.dataIndex) {
+				previousPoint = item.dataIndex;
+				$("#tooltip").remove();
+				//var x = item.datapoint[0].toFixed(0),
+				var x = item.series.xaxis.options.ticks[0][item.dataIndex][1],
+				y = item.datapoint[1];
+				//y = item.series.xaxis.options.ticks[0][item.dataIndex][1];
+					showTooltip(item.pageX, item.pageY,
+				    "{{ info_type }}: " + x + " (" + y + "x)");
+			}
+		} else {
+			$("#tooltip").remove();
+			previousPoint = null;
+		}
+
+	});
+				
+});
+
+</script>

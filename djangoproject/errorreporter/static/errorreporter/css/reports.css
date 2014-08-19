@@ -1,0 +1,104 @@
+body {
+	background-color: #F2F2F2;
+}
+
+table.crashreport, div.crashreport_aggr {
+	width: 1000px;
+	border-width: 1px;
+	border-style: solid;
+	border-color: #D8D8D8;
+	margin-bottom: 20px;
+}
+
+
+
+table.crashreport th {
+	width: 200px;
+	
+}
+table.crashreport_aggr th {
+	width: 200px;
+	background-color: #D8D8D8;
+}
+
+td, div, dd {
+	font-size: 12px;
+}
+
+div.report_header{
+	width: 100%;
+	background-color: #D8D8D8;
+	text-align: center;
+	font-weight: bold;
+	
+}
+
+div.report_contents
+{
+	background-color: #FFFFFF;
+	padding: 3px;
+}
+
+div.report_contents p, dd p
+{
+	margin: 0px;
+}
+
+ol
+{
+	margin: 0px;
+}
+
+dl.margins_removed
+{
+	margin: 0;
+	padding: 0;
+}
+	
+.margins_removed dt
+{
+	margin: 0;
+	padding: 0;
+	font-weight: bold;
+}
+	
+.margins_removed dd
+{
+	margin: 0 0 1em 0;
+	padding: 0;
+}
+
+.hidden
+{
+	display: none;
+}
+
+
+.qtip-wiki{
+    max-width: 600px;
+    overflow-y: scroll;
+    max-height: 500px;
+}
+
+.qtip-wiki p{
+    margin: 0 0 6px;
+}
+
+.qtip-wiki h1{
+    font-size: 20px;
+    line-height: 1.1;
+    margin: 0 0 5px;
+}
+
+.qtip-wiki img{
+    float: left;
+    margin: 10px 10px 10px 0;
+}
+
+.qtip-wiki .info{
+    overflow: hidden;
+}
+
+.qtip-wiki p.note{
+    font-weight: 700;
+}

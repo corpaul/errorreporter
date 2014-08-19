@@ -1,0 +1,32 @@
+<div>
+<h3>Aggregate reports:</h3>
+{% if crashreports_aggr %}
+	{% for c in crashreports_aggr %}
+		<div class="crashreport_aggr">
+			<div class="report_header">
+				Aggregate stacktrace (# of reports: {{ c.cnt }})  
+	        	<a href="{% url 'stacktrace_graphs' c.id %}" class="fancybox">More details</a>
+	        </div>
+			<div class="report_contents">
+	        	{{ c.stack|linebreaks  }}
+	        </div>	
+	       	<div class="report_header">
+	       		Comments
+	       	</div>
+	        <div class="report_contents">
+	       		<ol>
+	       		{% for comment, ids in c.comments.items %}
+		       		<li> {{ comment }} 
+					{% for id in ids %}
+						(<a href="{% url 'stacktrace' id %}" class="fancybox" rel="comments_group_{{ forloop.parentloop.parentloop.counter }}" >#{{ id }}</a>)
+					{% endfor %}
+					<br>
+				{% endfor %}
+	       		</ol>
+	        </div>
+		</div>
+	{% endfor %}
+
+{% endif %}
+</div>
+<hr>

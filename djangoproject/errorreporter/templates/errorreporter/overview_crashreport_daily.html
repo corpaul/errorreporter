@@ -1,0 +1,28 @@
+{% load staticfiles %}
+{% include "errorreporter/header.html" %}
+
+<script type="text/javascript">
+	$(document).ready(function(){
+		$("#reports").change(function(){
+			var url = "crashreport_daily/" + $(this).val();
+			$("iframe").attr("src",url);
+		});
+		$("iframe").attr("src", "crashreport_daily/" + $("#reports option:selected").val());
+	});
+	</script>
+
+Select date:
+
+{% if crashreports %}
+	<select id="reports">
+		{% for c in crashreports %}
+			<option value="{{ c.date|date:"Y-m-d" }}">{{ c.date|date:"Y-m-d" }} ({{ c.cnt }} reports)</option>
+		{% endfor %}
+	</select><br><br>
+{% else %}
+    <p>No crash reports are available.</p>
+{% endif %}
+
+<iframe id="reports_iframe"></iframe>
+</body>
+</html>
