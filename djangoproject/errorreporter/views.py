@@ -1,13 +1,13 @@
 from django.shortcuts import render
 from django.db.models import Count
 from errorreporter.models import CrashReport
+from django.shortcuts import redirect
 import time
 
 
 # Create your views here.
 def index(request):
-    context = {}
-    return render(request, 'errorreporter/index.html', context)
+    return redirect('overview_daily')
 
 
 def overview_crashreport_version(request):
